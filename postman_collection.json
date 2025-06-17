@@ -1,0 +1,340 @@
+{
+  "info": {
+    "name": "Islamic Grave Assignment API",
+    "description": "Complete API collection for testing the Islamic Grave Assignment System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cemetery Sections",
+      "item": [
+        {
+          "name": "Get All Sections",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sections",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sections"]
+            }
+          }
+        },
+        {
+          "name": "Get Section by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sections/A",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sections", "A"]
+            }
+          }
+        },
+        {
+          "name": "Create Section",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"section_id\": \"TEST-SECTION\",\n  \"section_name\": \"Test Section\",\n  \"total_plots\": 100,\n  \"available_plots\": 100,\n  \"description\": \"Test section for API testing\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sections",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sections"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Graves",
+      "item": [
+        {
+          "name": "Get All Graves",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/graves?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "graves"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Graves by Section",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/graves?section=A",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "graves"],
+              "query": [
+                {
+                  "key": "section",
+                  "value": "A"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Available Graves",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/graves/available/A",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "graves", "available", "A"]
+            }
+          }
+        },
+        {
+          "name": "Get Grave by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/graves/A-01-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "graves", "A-01-01"]
+            }
+          }
+        },
+        {
+          "name": "Create Grave",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"grave_id\": \"TEST-GRAVE-01\",\n  \"section\": \"A\",\n  \"grave_row\": 1,\n  \"grave_plot\": 1,\n  \"status\": \"available\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/graves",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "graves"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deceased Persons",
+      "item": [
+        {
+          "name": "Get All Deceased",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/deceased?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "deceased"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Deceased",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/deceased?search=أحمد",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "deceased"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "أحمد"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Deceased by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/deceased/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "deceased", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Deceased Person",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name_arabic\": \"أحمد محمد علي\",\n  \"full_name_english\": \"Ahmed Mohammed Ali\",\n  \"eid\": \"123456789012345\",\n  \"age_at_death\": 75,\n  \"gender\": \"male\",\n  \"date_of_death\": \"2024-01-15\",\n  \"date_of_burial\": \"2024-01-16\",\n  \"nationality\": \"UAE\",\n  \"special_requests\": \"Test special requests\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/deceased",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "deceased"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Grave Assignments",
+      "item": [
+        {
+          "name": "Get All Assignments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/assignments?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "assignments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Assignment by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/assignments/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "assignments", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Assignment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deceased_id\": 1,\n  \"grave_id\": \"A-01-01\",\n  \"assigned_by\": \"Test User\",\n  \"burial_date\": \"2024-01-16\",\n  \"burial_time\": \"14:30:00\",\n  \"notes\": \"Test assignment notes\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/assignments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "assignments"]
+            }
+          }
+        },
+        {
+          "name": "Mark Burial Complete",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/assignments/1/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "assignments", "1", "complete"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Statistics",
+      "item": [
+        {
+          "name": "Get Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/statistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "statistics"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+} 
