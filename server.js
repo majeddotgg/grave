@@ -435,6 +435,152 @@ app.get('/api/assignments', async (req, res, next) => {
   }
 });
 
+// Assign deceased person to grave by section and grave ID
+app.post('/api/assignments/section/:sectionId/grave/:graveId',
+  [
+    param('sectionId').notEmpty().withMessage('Section ID is required'),
+    param('graveId').notEmpty().withMessage('Grave ID is required'),
+    body('full_name_arabic').notEmpty().withMessage('Arabic name is required'),
+    body('full_name_english').optional(),
+    body('eid').notEmpty().withMessage('Emirates ID is required'),
+    body('age_at_death').isInt({ min: 0 }).withMessage('Age at death must be a positive integer'),
+    body('gender').isIn(['male', 'female']).withMessage('Gender must be male or female'),
+    body('date_of_death').isDate().withMessage('Valid date of death is required'),
+    body('date_of_burial').optional().isDate().withMessage('Invalid burial date'),
+    body('nationality').optional(),
+    body('special_requests').optional(),
+    body('assigned_by').notEmpty().withMessage('Assigned by is required'),
+    body('burial_date').isDate().withMessage('Valid burial date is required'),
+    body('burial_time').matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/).withMessage('Valid burial time is required (HH:MM:SS)'),
+    body('notes').optional()
+  ],
+  handleValidationErrors,
+  async (req, res, next) => {
+    const connection = await pool.getConnection();
+    
+    try {
+      await connection.beginTransaction();
+      
+      const { sectionId, graveId } = req.params;
+      const {
+        // Deceased person data
+        full_name_arabic,
+        full_name_english,
+        eid,
+        age_at_death,
+        gender,
+        date_of_death,
+        date_of_burial,
+        nationality,
+        special_requests,
+        // Assignment data
+        assigned_by,
+        burial_date,
+        burial_time,
+        notes
+      } = req.body;
+      
+      // Check if section exists
+      const [sectionCheck] = await connection.execute(
+        'SELECT section_id FROM cemetery_sections WHERE section_id = ?',
+        [sectionId]
+      );
+      
+      if (sectionCheck.length === 0) {
+        throw new Error('Cemetery section not found');
+      }
+      
+      // Check if grave exists and belongs to the specified section
+      const [graveCheck] = await connection.execute(
+        'SELECT grave_id, status FROM graves WHERE grave_id = ? AND section = ?',
+        [graveId, sectionId]
+      );
+      
+      if (graveCheck.length === 0) {
+        throw new Error('Grave not found in the specified section');
+      }
+      
+      if (graveCheck[0].status !== 'available') {
+        throw new Error('Grave is not available for assignment');
+      }
+      
+      // Check if Emirates ID already exists
+      const [eidCheck] = await connection.execute(
+        'SELECT deceased_id FROM deceased_persons WHERE eid = ?',
+        [eid]
+      );
+      
+      if (eidCheck.length > 0) {
+        throw new Error('Emirates ID already exists in the system');
+      }
+      
+      // Create deceased person record
+      const [deceasedResult] = await connection.execute(
+        `INSERT INTO deceased_persons 
+         (full_name_arabic, full_name_english, eid, age_at_death, gender, date_of_death, date_of_burial, nationality, special_requests) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          full_name_arabic, 
+          full_name_english || null, 
+          eid, 
+          age_at_death, 
+          gender, 
+          date_of_death, 
+          date_of_burial || null, 
+          nationality || null, 
+          special_requests || null
+        ]
+      );
+      
+      const deceasedId = deceasedResult.insertId;
+      
+      // Create grave assignment
+      const [assignmentResult] = await connection.execute(
+        'INSERT INTO grave_assignments (deceased_id, grave_id, assigned_by, burial_date, burial_time, notes) VALUES (?, ?, ?, ?, ?, ?)',
+        [deceasedId, graveId, assigned_by, burial_date, burial_time, notes || null]
+      );
+      
+      // Update grave status
+      await connection.execute(
+        'UPDATE graves SET status = "occupied" WHERE grave_id = ?',
+        [graveId]
+      );
+      
+      // Update section available plots count
+      await connection.execute(
+        'UPDATE cemetery_sections SET available_plots = available_plots - 1 WHERE section_id = ?',
+        [sectionId]
+      );
+      
+      await connection.commit();
+      
+      res.status(201).json({
+        success: true,
+        message: 'Deceased person and grave assignment created successfully',
+        deceased_id: deceasedId,
+        assignment_id: assignmentResult.insertId,
+        section_id: sectionId,
+        grave_id: graveId,
+        eid: eid,
+        full_name_arabic: full_name_arabic
+      });
+    } catch (error) {
+      await connection.rollback();
+      
+      if (error.message.includes('not found') || error.message.includes('not available') || error.message.includes('already exists')) {
+        return res.status(400).json({
+          success: false,
+          message: error.message
+        });
+      }
+      
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+);
+
 // Get specific grave assignment
 app.get('/api/assignments/:id',
   [param('id').isInt().withMessage('Invalid assignment ID')],
